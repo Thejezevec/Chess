@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>    
+    <meta charset="UTF-8">
+    <title>{{game.player_white}} vs {{game.player_black}}</title>
+    <style>
+        table{
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        td {
+            width:40px;
+            height: 40px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #000;
+            font-size: 24px;
+        }
+        .light {
+            background-color: #f0d9b5;
+        }
+        .dark {
+            background-color: #b58863;
+        }
+    </style>
+</head>
+<body>
+
+<h1>{{ game.player_white }} vs {{ game.player_black }}</h1>
+
+<table>
+    {% for row in board %}
+        <tr>
+            {% for square in row %}
+                <td class="{% if forloop.parentloop.counter0|add:forloop.counter0|divisibleby:2 %}light{% else %}dark{% endif %}">
+                    {{ square }}
+                </td>
+            {% endfor %}
+        </td>
+    {% endfor %}
+</table>
+
+
+</body>
+</html>

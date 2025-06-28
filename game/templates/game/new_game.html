@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nová hra</title>
+</head>
+<body>
+    <h1>Vytvořit novou šachovou hru</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Spustit hru</button>
+    </form>
+</body>
+</html>
