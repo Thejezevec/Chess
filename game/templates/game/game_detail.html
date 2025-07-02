@@ -23,21 +23,46 @@
             background-color: #b58863;
         }
     </style>
+<script>
+    let from = null;
+
+    function squareClicked(td) {
+        const coord = td.dataset.coord;
+        console.log("Clicked:", coord);
+
+        if (!from) {
+            from = coord;
+            td.style.outline = "2px solid red";
+        } else {
+            const to = coord;
+            alert(`move from ${from} to ${to}`);  // správný template string
+            from = null;
+
+            document.querySelectorAll("td").forEach(cell => {
+                cell.style.outline = "";
+            });
+        }
+    }
+
+    console.log("JavaScript is loaded");
+</script>
 </head>
 <body>
 
 <h1>{{ game.player_white }} vs {{ game.player_black }}</h1>
 
 <table>
-    {% for row in board %}
-        <tr>
-            {% for square in row %}
-                <td class="{% if forloop.parentloop.counter0|add:forloop.counter0|divisibleby:2 %}light{% else %}dark{% endif %}">
-                    {{ square }}
-                </td>
-            {% endfor %}
+  {% for row in board %}
+    <tr>
+      {% for square in row.squares %}
+         <td data-coord="{{ square.col_letter }}{{ row.row_num }}"
+                onclick="squareClicked(this)"
+                class="{% if forloop.parentloop.counter0|add:forloop.counter0|divisibleby:2 %}light{% else %}dark{% endif %}">
+                {{ square.value }}
         </td>
-    {% endfor %}
+      {% endfor %}
+    </tr>
+  {% endfor %}
 </table>
 
 

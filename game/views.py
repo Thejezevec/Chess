@@ -3,6 +3,12 @@ from .forms import GameForm
 from .models import Game
 from django.shortcuts import get_object_or_404
 
+    #chess notation into unicode figures
+UNICODE_PIECES = {
+    'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',
+    'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟︎',
+}
+
 def new_game(request):
     if request.method == 'POST':
         form = GameForm(data=request.POST)
@@ -29,13 +35,26 @@ def game_detail(request, game_id):
     rows = board_fen.split('/')
 
     board = []
-    for row in rows:
+    for row_index, row in enumerate(rows):
         expanded_row = []
         for char in row:
             if char.isdigit():
                 expanded_row.extend(['']*int(char))
             else:
-                expanded_row.append(char)
-        board.append(expanded_row)
+                symbol = UNICODE_PIECES.get(char, char)
+                expanded_row.append(symbol)
+
+        #coordinations for js template
+        row_data = {
+            'row_num': 8 - row_index,
+            'squares': [
+                {'col_letter': chr(ord('a') + col_index), 'value': square}
+                for col_index, square in enumerate(expanded_row)
+            ]
+        }
+        board.append(row_data)
+        
 
     return render(request, 'game/game_detail.html', {'game': game, 'board':board})
+
+
