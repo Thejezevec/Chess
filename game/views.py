@@ -2,6 +2,10 @@ from django.shortcuts import render, redirect
 from .forms import GameForm
 from .models import Game
 from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+import json
+import chess
 
     #chess notation into unicode figures
 UNICODE_PIECES = {
@@ -58,3 +62,35 @@ def game_detail(request, game_id):
     return render(request, 'game/game_detail.html', {'game': game, 'board':board})
 
 
+def make_move(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+
+    try:
+        data = json.loads(request.body)
+        from_square = data.get('from')
+        to_square = data.get('to')
+    except (KeyError, json.JSONDecodeError):
+        return JsonResponse({'error': 'Invalid data'}, status=400)
+    
+    board = chess.Board(game.board_state)
+
+    move_uci = from_square + to_square
+    move = chess.Move.from_uci(move_uci)
+
+    if move in board.legal_moves:
+        board.push(move)
+        game.board_state = board.fen()
+        game.save()
+
+        Move.objects.create(
+            game=game,
+            player='white' if board.turn == chess.BLACK else 'black',
+            move=board.san(move),
+            from_square=from_square,
+            to_square=to_square,
+            piece=str(board.piece_at(chess.parse_square(from_square)))
+        )
+
+        return JsonResponse({'success': True, 'new_fen': game.board_state})
+    else:
+        return JsonResponse({'error': 'Invalid move'}, status=400)
