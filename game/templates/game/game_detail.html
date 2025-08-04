@@ -46,6 +46,62 @@
 
     console.log("JavaScript is loaded");
 </script>
+<script>
+let from = null;
+const gameId = "{{ game.id }}";
+
+function squareClicked(td) {
+    const coord = td.dataset.coord;
+    console.log("Clicked:", coord);
+
+    if (!from) {
+        from = coord;
+        td.style.outline = "2px solid red";
+    } else {
+        const to = coord;
+        fetch(`/game/${gameId}/move/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getcookie('csrftoken')
+    },
+            body: JSON.stringify({ from: from, to: to })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`Moved from ${from} to ${to}`);
+                location.reload(); // Reload the page to update the board
+            } else {
+                alert('Invalid move');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+
+        from = null;
+
+        document.querySelectorAll("td").forEach(cell => {
+            cell.style.outline = "";
+        });
+    }
+}
+
+function getcookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for(let i = 0; i < cookies.lenght; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
 </head>
 <body>
 
